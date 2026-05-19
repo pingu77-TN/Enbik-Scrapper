@@ -161,14 +161,15 @@ def parse_product(session: requests.Session, url: str, category: str) -> dict:
             if src not in image_urls:
                 image_urls.append(src)
 
-    # Download images
-    IMAGE_DIR.mkdir(exist_ok=True)
+    # Download images into images/<model>/ (one folder per product)
     model_slug = safe_filename(model)
+    prod_dir = IMAGE_DIR / model_slug
+    prod_dir.mkdir(parents=True, exist_ok=True)
     saved_files: list[str] = []
     for i, img_url in enumerate(image_urls[:8], 1):   # cap at 8 per product
         ext = Path(img_url.split("?")[0]).suffix or ".jpg"
         filename = f"{model_slug}_{i}{ext}"
-        dest = IMAGE_DIR / filename
+        dest = prod_dir / filename
         if not dest.exists():
             if download_image(session, img_url, dest):
                 saved_files.append(filename)
